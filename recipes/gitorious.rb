@@ -59,12 +59,14 @@ execute "patch -p0 -i zw_base_css.patch" do
   user git_user
   group git_group
   cwd "/srv/rails/gitorious.zeddworks.com/current"
+  not_if "sed -n '304p' /srv/rails/gitorious.zeddworks.com/current/public/stylesheets/base.css | grep 'padding: 0px 0 0 0px;'"
 end
 
 execute "patch -p0 -i zw_external_css.patch" do
   user git_user
   group git_group
   cwd "/srv/rails/gitorious.zeddworks.com/current"
+  not_if "sed -n '66p' /srv/rails/gitorious.zeddworks.com/current/public/stylesheets/external.css | grep 'width: 100px;'"
 end
 
 file "/srv/rails/gitorious.zeddworks.com/current/public/stylesheets/all.css" do
