@@ -17,4 +17,56 @@
 # limitations under the License.
 #
 
+gitorious = Chef::EncryptedDataBagItem.load("apps", "gitorious")
+zw_brand = Chef::EncryptedDataBagItem.load("env", "zw_brand")
 
+git_user = gitorious["user"]
+git_group = gitorious["group"]
+
+file "/tmp/logo.b64" do
+  content zw_brand["logo"]
+  owner git_user
+  group git_group
+end
+
+execute "cat /tmp/logo.b64 | base64 -d > /srv/rails/gitorious.zeddworks.com/current/public/img/logo.png" do
+  user git_user
+  group git_group
+end
+
+execute "cat /tmp/logo.b64 | base64 -d > /srv/rails/gitorious.zeddworks.com/current/public/img/external/logo.png" do
+  user git_user
+  group git_group
+end
+
+file "/tmp/logo.b64" do
+  action :delete
+end
+
+cookbook_file "/srv/rails/gitorious.zeddworks.com/current/zw_base_css.patch" do
+  source "zw_base_css.patch"
+  owner git_user
+  group git_group
+end
+
+cookbook_file "/srv/rails/gitorious.zeddworks.com/current/zw_external_css.patch" do
+  source "zw_external_css.patch"
+  owner git_user
+  group git_group
+end
+
+execute "patch -p0 -i zw_base_css.patch" do
+  user git_user
+  group git_group
+  cwd "/srv/rails/gitorious.zeddworks.com/current"
+end
+
+execute "patch -p0 -i zw_external_css.patch" do
+  user git_user
+  group git_group
+  cwd "/srv/rails/gitorious.zeddworks.com/current"
+end
+
+file "/srv/rails/gitorious.zeddworks.com/current/public/stylesheets/all.css" do
+  action :delete
+end
